@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Instalar dependências
+        run: bun install
+      - name: Build (gera também o routeTree)
+        run: bun run build
+      - name: Verificar routeTree.gen.ts atualizado
+        run: git diff --exit-code src/routeTree.gen.ts || (echo "::warning::routeTree.gen.ts desatualizado"; git diff src/routeTree.gen.ts)
+      - name: Verificação de tipos
+        run: bunx tsc --noEmit
+      - name: Testes
+        run: bun run test
+      - name: Lint
+        run: bun run lint
