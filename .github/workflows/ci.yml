@@ -23,3 +23,11 @@ jobs:
         run: bun run test
       - name: Lint
         run: bun run lint
+      - name: Conexão com o Supabase (informativo)
+        continue-on-error: true
+        run: |
+          set -a; . ./.env; set +a
+          for t in categories products site_settings; do
+            code=$(curl -s -o /tmp/out.json -w "%{http_code}" "$VITE_SUPABASE_URL/rest/v1/$t?select=*&limit=3" -H "apikey: $VITE_SUPABASE_PUBLISHABLE_KEY")
+            echo "$t -> HTTP $code"; head -c 400 /tmp/out.json; echo
+          done
