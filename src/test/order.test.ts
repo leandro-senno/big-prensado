@@ -77,7 +77,7 @@ describe("carrinho", () => {
   });
 
   it("gera identificador de pedido", () => {
-    expect(generateOrderId(1_700_000_000_000, 0.5)).toMatch(/^BP-[0-9A-Z]{6}$/);
+    expect(generateOrderId(1_700_000_000_000, 0.5)).toMatch(/^BL-[0-9A-Z]{6}$/);
   });
 });
 
@@ -105,7 +105,7 @@ describe("WhatsApp", () => {
         changeFor: "R$ 100,00",
       },
       {
-        orderId: "BP-TESTE1",
+        orderId: "BL-TESTE1",
         items: [item()],
         subtotalCents: 7580,
         discountCents: 758,
@@ -114,7 +114,7 @@ describe("WhatsApp", () => {
         totalCents: 7322,
       },
     );
-    expect(msg).toContain("Pedido: *BP-TESTE1*");
+    expect(msg).toContain("Pedido: *BL-TESTE1*");
     expect(msg).toContain("*Cliente:* Maria");
     expect(msg).toContain("*Atendimento:* Entrega");
     expect(msg).toContain("*Endereço:* Rua A, 10 – Centro");
@@ -133,7 +133,7 @@ describe("WhatsApp", () => {
     const msg = buildOrderMessage(
       { name: "João", phone: "", mode: "retirada" },
       {
-        orderId: "BP-X",
+        orderId: "BL-X",
         items: [item({ addons: [], removed: [], notes: "" })],
         subtotalCents: 6580,
         discountCents: 0,
@@ -178,9 +178,9 @@ describe("configurações", () => {
   });
 
   it("descarta campos inválidos mantendo os válidos", () => {
-    const s = parseSettings({ whatsapp: "123", businessName: "Big Prensado Barueri" });
+    const s = parseSettings({ whatsapp: "123", businessName: "Big Lanche Barueri" });
     expect(s.whatsapp).toBe(DEFAULT_SETTINGS.whatsapp);
-    expect(s.businessName).toBe("Big Prensado Barueri");
+    expect(s.businessName).toBe("Big Lanche Barueri");
   });
 
   it("valida período das promoções", () => {

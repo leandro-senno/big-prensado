@@ -5,7 +5,7 @@ import type { Category, GalleryImage, Product, Promotion } from "@/types/catalog
  * --------------------
  * Servem apenas para visualizar o layout enquanto o banco de dados não está
  * configurado. Nomes, descrições, preços e fotos NÃO são ofertas reais do
- * Big Prensado e aparecem no site com o selo "Exemplo".
+ * Big Lanche e aparecem no site com o selo "Exemplo".
  *
  * "Big Brasil Prensado" e "Big Picanha" foram citados em avaliações públicas da
  * unidade de referência; disponibilidade, receita e preço precisam ser
@@ -234,7 +234,7 @@ export const DEMO_PRODUCTS: Product[] = [
   p({
     id: "demo-combo-big",
     categoryId: "cat-combos",
-    name: "Combo Big Prensado",
+    name: "Combo Big Lanche",
     description: "Big Brasil Prensado + batata frita + refrigerante lata.",
     ingredients: "1 Big Brasil Prensado, batata frita média e 1 refrigerante lata",
     priceCents: 4490,

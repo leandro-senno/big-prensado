@@ -14,7 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 
-const SITE_TITLE = "Big Prensado | Lanches prensados, hambúrgueres e pastéis";
+const SITE_TITLE = "Big Lanche | Lanches prensados, hambúrgueres e pastéis";
 const SITE_DESCRIPTION =
   "Lanches prensados caprichados, hambúrgueres, cachorros-quentes, pastéis e porções. Veja o cardápio, monte seu pedido e envie pelo WhatsApp.";
 
@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: SITE_DESCRIPTION },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "pt_BR" },
-      { property: "og:site_name", content: "Big Prensado" },
+      { property: "og:site_name", content: "Big Lanche" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: SITE_TITLE },
       { name: "twitter:description", content: SITE_DESCRIPTION },

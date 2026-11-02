@@ -36,7 +36,7 @@ export function normalizeWhatsapp(raw: string): string | null {
 
 export function buildOrderMessage(customer: OrderCustomer, order: OrderSummary): string {
   const lines: string[] = [];
-  lines.push(`*NOVO PEDIDO — BIG PRENSADO*`);
+  lines.push(`*NOVO PEDIDO — BIG LANCHE*`);
   lines.push(`Pedido: *${order.orderId}*`);
   lines.push("");
   lines.push(`*Cliente:* ${customer.name.trim()}`);

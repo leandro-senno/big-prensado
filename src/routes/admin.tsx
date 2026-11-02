@@ -7,7 +7,7 @@ import { AdminApp } from "@/components/admin/AdminApp";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Painel administrativo | Big Prensado" },
+      { title: "Painel administrativo | Big Lanche" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),

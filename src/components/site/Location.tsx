@@ -155,7 +155,7 @@ export function Location({ settings }: { settings: SiteSettings }) {
           {embedSrc ? (
             <div className="overflow-hidden rounded-3xl border border-white/10 bg-brand-black-2">
               <iframe
-                title="Mapa com a localização do Big Prensado"
+                title="Mapa com a localização do Big Lanche"
                 src={embedSrc}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

@@ -1,6 +1,6 @@
-# Big Prensado
+# Big Lanche
 
-Site comercial da lanchonete **Big Prensado**: cardápio digital, carrinho com personalização, finalização de pedido pelo WhatsApp e painel administrativo com banco de dados.
+Site comercial da lanchonete **Big Lanche**: cardápio digital, carrinho com personalização, finalização de pedido pelo WhatsApp e painel administrativo com banco de dados.
 
 > O repositório no GitHub é a fonte oficial do código. O Lovable é usado apenas para visualizar o resultado (preview).
 

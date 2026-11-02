@@ -57,12 +57,12 @@ export function discountCents(subtotal: number, percent: number | null): number 
   return Math.round((subtotal * p) / 100);
 }
 
-/** Identificador curto e legível para o pedido, ex.: BP-7K3F9Q */
+/** Identificador curto e legível para o pedido, ex.: BL-7K3F9Q */
 export function generateOrderId(now: number = Date.now(), rand: number = Math.random()): string {
   const t = now.toString(36).slice(-4).toUpperCase();
   const r = Math.floor(rand * 36 * 36)
     .toString(36)
     .padStart(2, "0")
     .toUpperCase();
-  return `BP-${t}${r}`;
+  return `BL-${t}${r}`;
 }

@@ -83,7 +83,7 @@ export function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <a
           href="#inicio"
-          aria-label="Big Prensado — início"
+          aria-label="Big Lanche — início"
           className="shrink-0"
           onClick={() => setMobileOpen(false)}
         >

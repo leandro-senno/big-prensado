@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Configurações comerciais do Big Prensado.
+ * Configurações comerciais do Big Lanche.
  *
  * IMPORTANTE: as informações abaixo foram encontradas na ficha "Big Lanches"
  * do Google Maps indicada pelo cliente e AINDA NÃO FORAM CONFIRMADAS. Por isso
@@ -95,7 +95,7 @@ export const ILLUSTRATIVE_IMAGES = {
 export const MAPS_REFERENCE_URL = "https://maps.app.goo.gl/WcneQXVzDAEFueVd7";
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  businessName: "Big Prensado",
+  businessName: "Big Lanche",
   shortDescription:
     "Lanches prensados caprichados, hambúrgueres, pastéis e muito sabor. Peça agora e mate a fome do jeito certo.",
   address: {
@@ -125,7 +125,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   hero: {
     kicker: "Bateu aquela fome?",
     title: "O tamanho da sua fome tem nome.",
-    highlight: "Big Prensado!",
+    highlight: "Big Lanche!",
     subtitle: "Lanches caprichados, muito recheio e aquele sabor que dá vontade de repetir.",
     imageUrl: ILLUSTRATIVE_IMAGES.hero,
   },
@@ -136,7 +136,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   },
   about: {
     title: "Feito na chapa, do jeito que tem que ser",
-    text: "No Big Prensado, o lanche é levado a sério: pão tostadinho na prensa, recheio generoso e queijo derretendo em cada mordida. A ideia é simples: comida bem feita, servida quentinha, para você matar a fome com vontade.\n\nDo clássico prensado aos hambúrgueres, pastéis e porções, a proposta é sempre a mesma: lanche caprichado, com aquele cuidado que faz diferença.",
+    text: "No Big Lanche, lanche é coisa séria: pão tostadinho na prensa, recheio generoso e queijo derretendo em cada mordida. A ideia é simples: comida bem feita, servida quentinha, para você matar a fome com vontade.\n\nDo clássico prensado aos hambúrgueres, pastéis e porções, a proposta é sempre a mesma: lanche caprichado, com aquele cuidado que faz diferença.",
     imageUrl: ILLUSTRATIVE_IMAGES.about,
   },
 };

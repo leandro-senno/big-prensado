@@ -6,10 +6,10 @@ import { Logo } from "@/components/site/Logo";
 export const Route = createFileRoute("/politica-de-privacidade")({
   head: () => ({
     meta: [
-      { title: "Política de Privacidade | Big Prensado" },
+      { title: "Política de Privacidade | Big Lanche" },
       {
         name: "description",
-        content: "Saiba como o site do Big Prensado trata os dados informados ao montar um pedido.",
+        content: "Saiba como o site do Big Lanche trata os dados informados ao montar um pedido.",
       },
     ],
   }),

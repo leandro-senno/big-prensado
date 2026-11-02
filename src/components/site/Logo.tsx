@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Marca própria do Big Prensado: selo com sanduíche prensado (marcas da chapa)
+ * Marca própria do Big Lanche: selo com sanduíche prensado (marcas da chapa)
  * + logotipo tipográfico. Não reproduz artes de terceiros.
  */
 export function LogoMark({ className }: { className?: string }) {
@@ -42,7 +42,7 @@ export function Logo({ className, compact = false }: { className?: string; compa
           BIG
         </span>
         <span className="font-display text-sm tracking-[0.18em] text-white sm:text-base">
-          PRENSADO
+          LANCHE
         </span>
       </span>
     </span>
