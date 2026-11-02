@@ -137,6 +137,19 @@ export function SettingsPanel({
               inputMode="tel"
             />
           </FormField>
+          <div className="md:col-span-2">
+            <Toggle
+              id="s-orders-nowa"
+              label="Receber pedidos só pelo painel enquanto não houver WhatsApp"
+              checked={s.orders.acceptWithoutWhatsapp}
+              onChange={(v) => patch("orders", { acceptWithoutWhatsapp: v })}
+            />
+            <p className="text-xs text-brand-gray">
+              Com WhatsApp cadastrado, todo pedido é salvo em Pedidos e também enviado pelo
+              WhatsApp. Sem WhatsApp, os pedidos só chegam aqui se esta opção estiver ligada —
+              acompanhe a aba Pedidos.
+            </p>
+          </div>
           <FormField label="Telefone exibido" htmlFor="s-phone">
             <input
               id="s-phone"

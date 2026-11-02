@@ -12,6 +12,7 @@ import type { Category, GalleryImage, Product, Promotion } from "@/types/catalog
 
 import { CategoriesPanel } from "./CategoriesPanel";
 import { GalleryPanel } from "./GalleryPanel";
+import { OrdersPanel, useOrdersFeed } from "./OrdersPanel";
 import { ProductsPanel } from "./ProductsPanel";
 import { PromotionsPanel } from "./PromotionsPanel";
 import { SettingsPanel } from "./SettingsPanel";
@@ -20,12 +21,12 @@ import { btnGhost, btnPrimary, errorMessage, FormField, inputCls, Panel } from "
 type Tab = "produtos" | "categorias" | "promocoes" | "galeria" | "configuracoes" | "pedidos";
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: "pedidos", label: "Pedidos" },
   { id: "produtos", label: "Produtos" },
   { id: "categorias", label: "Categorias" },
   { id: "promocoes", label: "Promoções" },
   { id: "galeria", label: "Galeria" },
   { id: "configuracoes", label: "Configurações" },
-  { id: "pedidos", label: "Pedidos" },
 ];
 
 interface AdminData {
@@ -168,7 +169,6 @@ export function AdminApp() {
   const [session, setSession] = useState<Session | null>(null);
   const [data, setData] = useState<AdminData | null>(null);
   const [loadError, setLoadError] = useState("");
-  const [tab, setTab] = useState<Tab>("produtos");
 
   const bootstrap = useCallback(async (s: Session | null) => {
     if (!s) {
@@ -250,6 +250,17 @@ export function AdminApp() {
 
   return (
     <Shell email={session?.email ?? ""} onLogout={() => void logout()}>
+      <Dashboard data={data} setData={setData} />
+    </Shell>
+  );
+}
+
+function Dashboard({ data, setData }: { data: AdminData; setData: (d: AdminData) => void }) {
+  const [tab, setTab] = useState<Tab>("pedidos");
+  const feed = useOrdersFeed();
+
+  return (
+    <>
       <nav
         aria-label="Seções do painel"
         className="-mx-4 mb-6 overflow-x-auto px-4 sm:mx-0 sm:px-0"
@@ -263,20 +274,27 @@ export function AdminApp() {
                 aria-selected={tab === t.id}
                 onClick={() => setTab(t.id)}
                 className={cn(
-                  "h-10 whitespace-nowrap rounded-full px-4 text-sm font-semibold transition",
+                  "relative h-10 whitespace-nowrap rounded-full px-4 text-sm font-semibold transition",
                   tab === t.id
                     ? "bg-brand-orange text-brand-black"
                     : "bg-white/5 text-white hover:bg-white/10",
                 )}
               >
                 {t.label}
+                {t.id === "pedidos" && feed.newCount > 0 ? (
+                  <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
+                    {feed.newCount}
+                  </span>
+                ) : null}
               </button>
             </li>
           ))}
         </ul>
       </nav>
 
-      {tab === "produtos" ? (
+      {tab === "pedidos" ? (
+        <OrdersPanel feed={feed} />
+      ) : tab === "produtos" ? (
         <ProductsPanel
           products={data.products}
           categories={data.categories}
@@ -295,26 +313,12 @@ export function AdminApp() {
         />
       ) : tab === "galeria" ? (
         <GalleryPanel images={data.gallery} onChange={(gallery) => setData({ ...data, gallery })} />
-      ) : tab === "configuracoes" ? (
+      ) : (
         <SettingsPanel
           settings={data.settings}
           onSaved={(settings) => setData({ ...data, settings })}
         />
-      ) : (
-        <Panel title="Pedidos">
-          <div className="space-y-2 text-sm text-brand-gray">
-            <p>
-              Os pedidos são finalizados diretamente pelo WhatsApp do estabelecimento e{" "}
-              <strong className="text-white">não são registrados</strong> no sistema. Por isso não
-              há lista de pedidos aqui.
-            </p>
-            <p>
-              A estrutura está pronta para, no futuro, gravar pedidos no servidor com recálculo dos
-              preços e integrar um meio de pagamento online.
-            </p>
-          </div>
-        </Panel>
       )}
-    </Shell>
+    </>
   );
 }
