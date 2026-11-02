@@ -1,0 +1,58 @@
+[
+  {
+    "name": "broken-images-desktop",
+    "errors": []
+  },
+  {
+    "name": "horizontal-overflow-desktop",
+    "errors": []
+  },
+  {
+    "name": "home-desktop",
+    "errors": []
+  },
+  {
+    "name": "broken-images-mobile",
+    "errors": []
+  },
+  {
+    "name": "horizontal-overflow-mobile",
+    "errors": []
+  },
+  {
+    "name": "home-mobile",
+    "errors": []
+  },
+  {
+    "name": "filtro-busca",
+    "errors": []
+  },
+  {
+    "name": "mobile-menu",
+    "errors": []
+  },
+  {
+    "name": "/admin",
+    "errors": []
+  },
+  {
+    "name": "/politica-de-privacidade",
+    "errors": []
+  },
+  {
+    "name": "/pagina-inexistente",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ]
+  },
+  {
+    "name": "/sitemap.xml",
+    "errors": [],
+    "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>http://localhost:8080/</loc>\n    <changefreq>weekly</changefreq>\n  </url>\n  <url>\n    <loc>http://localhost:8080/politica-de-privacidade</loc>\n    <changefreq>weekly</changefreq>\n  </url>\n</urlset>\n"
+  },
+  {
+    "name": "/robots.txt",
+    "errors": [],
+    "body": "User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: http://localhost:8080/sitemap.xml\n"
+  }
+]
