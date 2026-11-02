@@ -202,3 +202,63 @@ describe("configurações", () => {
     );
   });
 });
+
+describe("pedidos", () => {
+  it("monta mensagens de status para o cliente", async () => {
+    const { buildStatusMessage, customerWhatsapp } = await import("@/services/orders");
+    const o = { code: "BL-0007", customerName: "Maria Silva", mode: "entrega" as const };
+    expect(buildStatusMessage(o, "saiu_entrega")).toBe(
+      "Olá, Maria! Seu pedido *BL-0007* saiu para entrega. 🛵 Bom apetite!",
+    );
+    expect(buildStatusMessage(o, "em_preparo")).toContain("em preparo");
+    expect(customerWhatsapp("11988887777")).toBe("5511988887777");
+    expect(customerWhatsapp("5511988887777")).toBe("5511988887777");
+  });
+
+  it("envia ao servidor apenas ids e escolhas (sem preços)", async () => {
+    const { toOrderPayload } = await import("@/services/orders");
+    const payload = toOrderPayload(
+      {
+        name: "Ana",
+        phone: "11999998888",
+        mode: "retirada",
+        address: null,
+        paymentMethod: "",
+        changeFor: "",
+        couponCode: "",
+      },
+      [item()],
+    );
+    expect(payload.items).toEqual([
+      { productId: "p1", quantity: 2, addonIds: ["a1"], removed: ["Tomate"], notes: "Bem passado" },
+    ]);
+    expect(JSON.stringify(payload)).not.toContain("unitPriceCents");
+  });
+
+  it("indica taxa a combinar na entrega sem taxa configurada", () => {
+    const msg = buildOrderMessage(
+      {
+        name: "Ana",
+        phone: "11999998888",
+        mode: "entrega",
+        address: {
+          street: "Rua B",
+          number: "1",
+          district: "Centro",
+          complement: "",
+          reference: "",
+        },
+      },
+      {
+        orderId: "BL-0001",
+        items: [item()],
+        subtotalCents: 7580,
+        discountCents: 0,
+        couponCode: null,
+        deliveryFeeCents: null,
+        totalCents: 7580,
+      },
+    );
+    expect(msg).toContain("Taxa de entrega: a combinar");
+  });
+});

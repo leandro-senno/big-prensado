@@ -57,6 +57,10 @@ export const settingsSchema = z.object({
     confirmed: z.boolean(),
   }),
   paymentMethods: z.array(z.string().trim().min(1).max(40)).max(10),
+  orders: z.object({
+    /** Recebe pedidos só pelo painel quando ainda não há WhatsApp cadastrado. */
+    acceptWithoutWhatsapp: z.boolean(),
+  }),
   social: z.object({
     instagram: httpsUrl,
     facebook: httpsUrl,
@@ -121,6 +125,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     confirmed: false,
   },
   paymentMethods: [],
+  orders: { acceptWithoutWhatsapp: false },
   social: { instagram: "", facebook: "", tiktok: "" },
   hero: {
     kicker: "Bateu aquela fome?",

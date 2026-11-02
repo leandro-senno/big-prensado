@@ -1,12 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { ArrowLeft, ImageOff, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ImageOff,
+  Loader2,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Trash2,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { WhatsappIcon } from "@/components/site/icons";
 import type { SiteSettings } from "@/config/settings";
 import { discountCents, generateOrderId, itemTotal } from "@/lib/cart";
 import { formatBRL } from "@/lib/format";
+import { isSupabaseConfigured, SupabaseError } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import {
   buildOrderMessage,
@@ -15,11 +27,19 @@ import {
   type OrderCustomer,
   type ServiceMode,
 } from "@/lib/whatsapp";
+import { orderItemsToCart, submitOrder, toOrderPayload } from "@/services/orders";
 import type { Promotion } from "@/types/catalog";
 
 import { useCart } from "./CartProvider";
 
-type Step = "cart" | "checkout" | "review";
+type Step = "cart" | "checkout" | "review" | "done";
+
+interface DoneOrder {
+  code: string;
+  message: string;
+  totalCents: number;
+  saved: boolean;
+}
 
 const checkoutSchema = z
   .object({
@@ -28,7 +48,7 @@ const checkoutSchema = z
       .string()
       .trim()
       .max(20)
-      .refine((v) => v === "" || v.replace(/\D/g, "").length >= 10, "Telefone incompleto."),
+      .refine((v) => v.replace(/\D/g, "").length >= 10, "Informe seu WhatsApp com DDD."),
     mode: z.enum(["entrega", "retirada"]),
     street: z.string().trim().max(120),
     number: z.string().trim().max(20),
@@ -110,7 +130,8 @@ export function CartSheet({
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState<Promotion | null>(null);
   const [couponError, setCouponError] = useState("");
-  const [orderId, setOrderId] = useState("");
+  const [sending, setSending] = useState(false);
+  const [done, setDone] = useState<DoneOrder | null>(null);
 
   const whatsapp = normalizeWhatsapp(settings.whatsapp);
   const { delivery, pickup, deliveryFeeCents } = settings.service;
@@ -122,8 +143,11 @@ export function CartSheet({
   }, [delivery, pickup]);
 
   useEffect(() => {
-    if (!cart.isOpen) setStep("cart");
-  }, [cart.isOpen]);
+    if (!cart.isOpen && step !== "done") setStep("cart");
+  }, [cart.isOpen, step]);
+
+  const acceptsOrders =
+    Boolean(whatsapp) || (isSupabaseConfigured && settings.orders.acceptWithoutWhatsapp);
 
   useEffect(() => {
     const only = modes.length === 1 ? modes[0] : undefined;
@@ -173,7 +197,6 @@ export function CartSheet({
       if (first) document.getElementById(`ck-${first}`)?.focus();
       return;
     }
-    setOrderId(generateOrderId());
     setStep("review");
   };
 
@@ -198,7 +221,7 @@ export function CartSheet({
   const message = useMemo(
     () =>
       buildOrderMessage(customer, {
-        orderId: orderId || "—",
+        orderId: "(gerado ao enviar)",
         items: cart.items,
         subtotalCents: subtotal,
         discountCents: discount,
@@ -206,8 +229,83 @@ export function CartSheet({
         deliveryFeeCents: form.mode === "entrega" ? deliveryFeeCents : null,
         totalCents: total,
       }),
-    [customer, orderId, cart.items, subtotal, discount, coupon, deliveryFeeCents, form.mode, total],
+    [customer, cart.items, subtotal, discount, coupon, deliveryFeeCents, form.mode, total],
   );
+
+  const finishLocally = () => {
+    // Sem banco (ou função ainda não instalada): usa os valores calculados aqui.
+    const code = generateOrderId();
+    setDone({
+      code,
+      message: message.replace("(gerado ao enviar)", code),
+      totalCents: total,
+      saved: false,
+    });
+  };
+
+  const submit = async () => {
+    if (sending || cart.items.length === 0) return;
+    setSending(true);
+    try {
+      if (!isSupabaseConfigured) {
+        if (!whatsapp) return;
+        finishLocally();
+      } else {
+        try {
+          const created = await submitOrder(
+            toOrderPayload(
+              {
+                name: form.name,
+                phone: form.phone,
+                mode: form.mode,
+                address: customer.address ?? null,
+                paymentMethod: form.payment,
+                changeFor: form.changeFor,
+                couponCode: coupon?.couponCode ?? "",
+              },
+              cart.items,
+            ),
+          );
+          const serverMessage = buildOrderMessage(customer, {
+            orderId: created.code,
+            items: orderItemsToCart(created.items),
+            subtotalCents: created.subtotalCents,
+            discountCents: created.discountCents,
+            couponCode: created.couponCode,
+            deliveryFeeCents: created.deliveryFeeCents,
+            totalCents: created.totalCents,
+          });
+          setDone({
+            code: created.code,
+            message: serverMessage,
+            totalCents: created.totalCents,
+            saved: true,
+          });
+        } catch (err) {
+          // 404 = função de pedidos ainda não instalada no banco.
+          if (err instanceof SupabaseError && err.status === 404 && whatsapp) {
+            finishLocally();
+          } else {
+            throw err;
+          }
+        }
+      }
+      cart.clear();
+      setCoupon(null);
+      setCouponInput("");
+      setStep("done");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Não foi possível enviar o pedido.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const startNewOrder = () => {
+    setDone(null);
+    setStep("cart");
+    cart.close();
+  };
 
   const empty = cart.items.length === 0;
 
@@ -220,7 +318,7 @@ export function CartSheet({
           aria-describedby={undefined}
         >
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-            {step !== "cart" ? (
+            {step === "checkout" || step === "review" ? (
               <button
                 type="button"
                 onClick={() => setStep(step === "review" ? "checkout" : "cart")}
@@ -235,7 +333,9 @@ export function CartSheet({
                 ? "Seu pedido"
                 : step === "checkout"
                   ? "Seus dados"
-                  : "Resumo do pedido"}
+                  : step === "review"
+                    ? "Resumo do pedido"
+                    : "Pedido enviado"}
             </DialogPrimitive.Title>
             <DialogPrimitive.Close
               className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-white/5"
@@ -246,7 +346,35 @@ export function CartSheet({
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-4">
-            {empty ? (
+            {step === "done" && done ? (
+              <div className="flex flex-col items-center py-6 text-center">
+                <CheckCircle2 className="h-16 w-16 text-green-400" aria-hidden="true" />
+                <p className="mt-4 font-display text-3xl uppercase">Pedido {done.code}</p>
+                <p className="mt-1 text-lg font-bold text-brand-amber">
+                  {formatBRL(done.totalCents)}
+                </p>
+                {whatsapp ? (
+                  <p className="mt-4 text-brand-gray">
+                    {done.saved ? "Seu pedido foi registrado. " : ""}Agora toque em{" "}
+                    <strong className="text-white">Enviar no WhatsApp</strong> para mandar a
+                    mensagem para a lanchonete.
+                  </p>
+                ) : (
+                  <p className="mt-4 text-brand-gray">
+                    A lanchonete recebeu seu pedido e vai falar com você pelo WhatsApp informado.
+                  </p>
+                )}
+                <p className="mt-3 text-xs text-brand-gray">
+                  O pedido é confirmado pela lanchonete. Nenhum pagamento foi feito pelo site.
+                </p>
+                <details className="mt-6 w-full rounded-2xl border border-white/10 bg-brand-black p-4 text-left text-sm">
+                  <summary className="cursor-pointer font-semibold">Ver resumo do pedido</summary>
+                  <pre className="mt-3 whitespace-pre-wrap break-words font-sans text-xs text-brand-gray">
+                    {done.message}
+                  </pre>
+                </details>
+              </div>
+            ) : empty ? (
               <div className="flex h-full flex-col items-center justify-center text-center">
                 <ShoppingBag className="h-14 w-14 text-white/20" aria-hidden="true" />
                 <p className="mt-4 font-display text-2xl uppercase">Carrinho vazio</p>
@@ -375,7 +503,7 @@ export function CartSheet({
                     maxLength={80}
                   />
                 </Field>
-                <Field id="ck-phone" label="Telefone para contato (opcional)" error={errors.phone}>
+                <Field id="ck-phone" label="Seu WhatsApp *" error={errors.phone}>
                   <input
                     id="ck-phone"
                     className={inputCls}
@@ -507,14 +635,14 @@ export function CartSheet({
                   </Field>
                 ) : null}
                 <p className="text-xs text-brand-gray">
-                  Usamos esses dados apenas para montar a mensagem do seu pedido. Nada é armazenado
-                  em nossos servidores.
+                  Usamos seus dados apenas para preparar e entregar o pedido. Veja a Política de
+                  Privacidade.
                 </p>
               </form>
             ) : (
               <div className="space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-brand-black p-4 text-sm">
-                  <p className="font-semibold">Pedido {orderId}</p>
+                  <p className="font-semibold">Confira seu pedido</p>
                   <p className="text-brand-gray">
                     {form.name} · {form.mode === "entrega" ? "Entrega" : "Retirada no local"}
                   </p>
@@ -563,7 +691,28 @@ export function CartSheet({
             )}
           </div>
 
-          {!empty ? (
+          {step === "done" && done ? (
+            <div className="space-y-3 border-t border-white/10 bg-brand-black-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {whatsapp ? (
+                <a
+                  href={buildWhatsAppUrl(whatsapp, done.message)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] font-bold uppercase tracking-wide text-brand-black transition hover:brightness-110"
+                >
+                  <WhatsappIcon className="h-5 w-5" />
+                  Enviar no WhatsApp
+                </a>
+              ) : null}
+              <button
+                type="button"
+                onClick={startNewOrder}
+                className="flex h-12 w-full items-center justify-center rounded-full border border-white/15 font-semibold text-white transition hover:border-white/40"
+              >
+                Fazer novo pedido
+              </button>
+            </div>
+          ) : !empty ? (
             <div className="space-y-3 border-t border-white/10 bg-brand-black-2 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               {step === "cart" && couponPromos.length > 0 ? (
                 <div>
@@ -637,20 +786,29 @@ export function CartSheet({
                 >
                   Revisar pedido
                 </button>
-              ) : whatsapp ? (
+              ) : acceptsOrders ? (
                 <>
-                  <a
-                    href={buildWhatsAppUrl(whatsapp, message)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] font-bold uppercase tracking-wide text-brand-black transition hover:brightness-110"
+                  <button
+                    type="button"
+                    onClick={() => void submit()}
+                    disabled={sending}
+                    className={cn(
+                      "flex h-14 w-full items-center justify-center gap-2 rounded-full font-bold uppercase tracking-wide text-brand-black transition hover:brightness-110 disabled:opacity-60",
+                      whatsapp ? "bg-[#25D366]" : "bg-brand-orange",
+                    )}
                   >
-                    <WhatsappIcon className="h-5 w-5" />
-                    Enviar pelo WhatsApp
-                  </a>
+                    {sending ? (
+                      <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+                    ) : whatsapp ? (
+                      <WhatsappIcon className="h-5 w-5" />
+                    ) : null}
+                    {sending ? "Enviando..." : "Enviar pedido"}
+                  </button>
                   <p className="text-center text-xs text-brand-gray">
-                    O WhatsApp abrirá com a mensagem pronta. O pedido só é confirmado após a
-                    resposta do estabelecimento.
+                    {whatsapp
+                      ? "Registramos o pedido e abrimos o WhatsApp com a mensagem pronta."
+                      : "O pedido vai direto para a lanchonete."}{" "}
+                    A confirmação é feita pela lanchonete.
                   </p>
                 </>
               ) : (

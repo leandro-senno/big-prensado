@@ -46,18 +46,18 @@ function PrivacyPage() {
           <section>
             <h2>Quais dados usamos</h2>
             <p>
-              Ao montar um pedido, você informa nome, telefone (opcional), endereço de entrega
-              (quando aplicável), forma de pagamento e observações. Esses dados são usados apenas
-              para montar a mensagem do pedido que você mesmo envia pelo WhatsApp.
+              Ao fazer um pedido, você informa nome, WhatsApp, endereço de entrega (quando
+              aplicável), forma de pagamento e observações. Esses dados são usados somente para
+              preparar, entregar e falar com você sobre o pedido.
             </p>
           </section>
           <section>
             <h2>Armazenamento</h2>
             <p>
-              O site não grava seus dados pessoais em servidores. O conteúdo do carrinho fica salvo
-              somente no seu navegador, para que você não perca o pedido ao recarregar a página, e
-              pode ser apagado a qualquer momento esvaziando o carrinho ou limpando os dados do
-              navegador.
+              O pedido fica registrado no sistema da lanchonete, com acesso restrito aos
+              administradores, pelo tempo necessário ao atendimento e ao cumprimento de obrigações
+              legais. O conteúdo do carrinho fica salvo apenas no seu navegador até a finalização.
+              Pagamentos não são feitos pelo site.
             </p>
           </section>
           <section>

@@ -36,23 +36,26 @@ export function normalizeWhatsapp(raw: string): string | null {
 
 export function buildOrderMessage(customer: OrderCustomer, order: OrderSummary): string {
   const lines: string[] = [];
-  lines.push(`*NOVO PEDIDO — BIG LANCHE*`);
-  lines.push(`Pedido: *${order.orderId}*`);
+  lines.push(`🍔 *NOVO PEDIDO — BIG LANCHE*`);
+  lines.push(`🧾 Pedido: *${order.orderId}*`);
   lines.push("");
-  lines.push(`*Cliente:* ${customer.name.trim()}`);
-  if (customer.phone.trim()) lines.push(`*Telefone:* ${customer.phone.trim()}`);
-  lines.push(`*Atendimento:* ${customer.mode === "entrega" ? "Entrega" : "Retirada no local"}`);
+  lines.push(`👤 *Cliente:* ${customer.name.trim()}`);
+  if (customer.phone.trim()) lines.push(`📱 *Telefone:* ${customer.phone.trim()}`);
+  lines.push(
+    `${customer.mode === "entrega" ? "🛵" : "🏪"} *Atendimento:* ${customer.mode === "entrega" ? "Entrega" : "Retirada no local"}`,
+  );
 
   if (customer.mode === "entrega" && customer.address) {
     const a = customer.address;
     const main = [a.street.trim(), a.number.trim()].filter(Boolean).join(", ");
-    lines.push(`*Endereço:* ${[main, a.district.trim()].filter(Boolean).join(" – ")}`);
+    lines.push(`📍 *Endereço:* ${[main, a.district.trim()].filter(Boolean).join(" – ")}`);
     if (a.complement.trim()) lines.push(`*Complemento:* ${a.complement.trim()}`);
     if (a.reference.trim()) lines.push(`*Referência:* ${a.reference.trim()}`);
   }
 
   lines.push("");
-  lines.push("*ITENS*");
+  lines.push("━━━━━━━━━━━━━━");
+  lines.push("*ITENS DO PEDIDO*");
   order.items.forEach((item, index) => {
     lines.push(`${index + 1}. ${item.quantity}x ${item.name} — ${formatBRL(itemTotal(item))}`);
     for (const addon of item.addons) {
@@ -66,7 +69,7 @@ export function buildOrderMessage(customer: OrderCustomer, order: OrderSummary):
     }
   });
 
-  lines.push("");
+  lines.push("━━━━━━━━━━━━━━");
   lines.push(`Subtotal: ${formatBRL(order.subtotalCents)}`);
   if (order.discountCents > 0) {
     const label = order.couponCode ? `Desconto (${order.couponCode})` : "Desconto";
@@ -74,19 +77,21 @@ export function buildOrderMessage(customer: OrderCustomer, order: OrderSummary):
   }
   if (customer.mode === "entrega" && order.deliveryFeeCents !== null) {
     lines.push(`Taxa de entrega: ${formatBRL(order.deliveryFeeCents)}`);
+  } else if (customer.mode === "entrega") {
+    lines.push("Taxa de entrega: a combinar");
   }
-  lines.push(`*Total: ${formatBRL(order.totalCents)}*`);
+  lines.push(`💰 *Total: ${formatBRL(order.totalCents)}*`);
 
   if (customer.paymentMethod) {
     lines.push("");
-    lines.push(`*Pagamento:* ${customer.paymentMethod}`);
+    lines.push(`💳 *Pagamento:* ${customer.paymentMethod}`);
     if (customer.changeFor && customer.changeFor.trim()) {
       lines.push(`*Troco para:* ${customer.changeFor.trim()}`);
     }
   }
 
   lines.push("");
-  lines.push("_Pedido montado pelo site. Aguardo a confirmação do estabelecimento._");
+  lines.push("_Pedido feito pelo site. Aguardo a confirmação da lanchonete._");
   return lines.join("\n");
 }
 
