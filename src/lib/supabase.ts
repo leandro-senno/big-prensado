@@ -154,7 +154,9 @@ async function headers(auth: boolean, extra?: Record<string, string>) {
     const session = await getSession();
     if (!session) throw new SupabaseError("Sua sessão expirou. Entre novamente.", 401);
     h["Authorization"] = `Bearer ${session.accessToken}`;
-  } else {
+  } else if (SUPABASE_KEY.startsWith("eyJ")) {
+    // Chave "anon" antiga (JWT). As novas chaves publishable (sb_publishable_...)
+    // não são JWT e devem ir somente no cabeçalho apikey.
     h["Authorization"] = `Bearer ${SUPABASE_KEY}`;
   }
   return h;
