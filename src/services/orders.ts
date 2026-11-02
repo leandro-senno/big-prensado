@@ -3,12 +3,7 @@ import type { CartItem } from "@/lib/cart";
 import type { ServiceMode } from "@/lib/whatsapp";
 
 export type OrderStatus =
-  | "novo"
-  | "em_preparo"
-  | "saiu_entrega"
-  | "pronto_retirada"
-  | "concluido"
-  | "cancelado";
+  "novo" | "em_preparo" | "saiu_entrega" | "pronto_retirada" | "concluido" | "cancelado";
 
 export const STATUS_LABELS: Record<OrderStatus, string> = {
   novo: "Novo",
